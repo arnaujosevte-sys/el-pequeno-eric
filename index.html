@@ -73,7 +73,7 @@ button:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
 .speaking .spk{animation:pulse .6s ease-in-out infinite alternate}
 @keyframes pulse{to{transform:scale(1.15)}}
 .progress{display:flex;gap:6px;justify-content:center;align-items:center;padding-top:12px;position:relative}
-.progress i{width:18px;height:18px;border-radius:50%;background:var(--paper);opacity:.6;transition:.3s}
+.progress i{width:14px;height:14px;border-radius:50%;background:var(--paper);opacity:.6;transition:.3s}
 .progress i.on{background:var(--sun);opacity:1;transform:scale(1.15);box-shadow:0 2px 0 var(--shadow)}
 .progress .gift{font-size:20px;margin-left:4px}
 .streak{position:absolute;right:0;top:8px;font-size:18px;font-weight:800;color:var(--tomato);opacity:0;transition:opacity .3s}
@@ -151,7 +151,7 @@ button:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
 .reward{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(255,194,60,.55);padding:16px}
 .reward .card2{background:var(--paper);border-radius:40px;padding:26px 34px;text-align:center;box-shadow:0 12px 0 var(--shadow);animation:pop .4s;max-width:92vw}
 .reward .pic{font-size:clamp(100px,32vw,170px);line-height:1.1;display:block;margin:0 auto}
-.reward .pic.bob{animation:bounce 1s infinite}
+.reward .pic.bob{animation:bounce 1s 3}
 .reward .pic.wig{animation:wiggle .4s}
 .reward p{font-size:26px;font-weight:800;margin:6px 0 14px}
 .go{background:var(--leaf);color:var(--paper);border-radius:999px;padding:12px 30px;font-size:24px;font-weight:800;box-shadow:0 6px 0 rgba(0,0,0,.18)}
@@ -238,7 +238,7 @@ canvas#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z
 </section>
 
 <div class="big" id="big" hidden></div>
-<div class="reward" id="reward" hidden><div class="card2"><button class="pic" id="rwPic">🎁</button><p id="rwText"></p><button class="go" id="rwGo">▶</button></div></div>
+<div class="reward" id="reward" hidden><div class="card2"><button class="pic" id="rwPic">🎁</button><p id="rwText"></p><button class="go" id="rwGo">¡Seguir! ▶</button></div></div>
 
 <!-- PARENTS -->
 <div class="parents" id="parents" hidden>
@@ -376,13 +376,13 @@ const MEDALS=[
 ].map(([id,e,es,en,test])=>({id,e,es,en,test}));
 const PRAISE={es:['¡Muy bien, Eric!','¡Genial!','¡Bravo, Eric!','¡Lo has encontrado!','¡Qué listo eres, Eric!','¡Fenomenal!','¡Sí, eso es!'],
   en:['Great job, Eric!','Well done!','Yes! You found it!','Super!','Awesome, Eric!','You did it!','Good job!']};
-const STARS_PER_GIFT=5;
+const STARS_PER_GIFT=10;
 
 const GAMES=[
  ['letters','A','Letras','Letters','--tomato'],['numbers','3','Números','Numbers','--sea'],['count','🍎🍎','Contar','Count','--leaf'],
  ['colors','🎨','Colores','Colors','--grape'],['shapes','⭐','Formas','Shapes','--pink'],['animals','🐮','Animales','Animals','--orange'],
  ['memory','🃏','Parejas','Memory','--teal'],['more','🍓🍓','¿Dónde hay más?','Which has more?','--tomato'],['pattern','🔴🔵🔴','Series','Patterns','--sea'],
- ['starts','🐻 O','¿Con qué empieza?','First letter','--leaf'],['case','A a','Grande y pequeña','Big and little','--grape'],['explore','👀','Explorar','Explore','--sun']];
+ ['starts','🐻 O','¿Con qué empieza?','First letter','--leaf'],['case','A a','Mayúscula y minúscula','Upper and lower','--grape'],['explore','👀','Explorar','Explore','--sun']];
 
 /* ---------- storage ---------- */
 const DEF={letterSet:'vowels',case:'upper',maxNum:'5',diff:'auto',rate:'0.8',sfx:'on',voice:'',voiceEn:'',lang:'es',showEn:'on',v:2};
@@ -511,7 +511,7 @@ function distractors(items,target,n){return shuffle(items.filter(i=>i.id!==targe
 const G={mode:null,streak:0,run:0,level:2,last:null,locked:false,prompt:'',hello:false};
 const lvl=()=>S.diff==='auto'?G.level:+S.diff;
 const nOpt=size=>Math.max(2,Math.min(lvl(),size));
-function startGame(mode){G.mode=mode;G.streak=0;G.run=0;G.level=2;G.last=null;G.hello=true;show('game');renderProgress();nextRound()}
+function startGame(mode){roundToken++;rewardOpen=false;queue.length=0;$('#reward').hidden=true;G.mode=mode;G.streak=0;G.run=0;G.level=2;G.last=null;G.hello=true;show('game');renderProgress();nextRound()}
 function renderProgress(){
   $('#progress').innerHTML=Array.from({length:STARS_PER_GIFT},(_,i)=>`<i class="${i<P.stars%STARS_PER_GIFT?'on':''}"></i>`).join('')+'<span class="gift">🎁</span>'+
     `<span class="streak ${G.run>=3?'on':''}">🔥${G.run}</span>`;
@@ -567,8 +567,8 @@ const BUILD={
     const t=weightedPick(items,'case',G.last), x=lx(t.l);
     const hero=document.createElement('div');hero.className='hero';hero.innerHTML=`<span class="big-letter">${t.l.L}</span>`;
     return {target:t,options:[t,...distractors(items,t,nOpt(items.length)-1)],hero,
-      prompt:tr(`Busca la ${x.n} pequeña`,`Find the little letter ${x.n}`),
-      after:tr(`La ${x.n} grande y la ${x.n} pequeña`,`Big letter ${x.n} and little letter ${x.n}`)};
+      prompt:tr(`Busca la ${x.n} minúscula`,`Find the lowercase letter ${x.n}`),
+      after:tr(`La ${x.n} mayúscula y la ${x.n} minúscula`,`Uppercase ${x.n} and lowercase ${x.n}`)};
   },
   count(){
     const max=Math.min(+S.maxNum,10);
@@ -652,7 +652,10 @@ function answer(btn,it){
 }
 
 /* shared success: stars, streaks, medals, gifts */
-const queue=[];
+const queue=[];let rewardOpen=false,roundToken=0;
+/* next present at the next multiple of STARS_PER_GIFT; old backlogs are never replayed */
+if(!P.giftAt)P.giftAt=Math.min((P.stickers+1)*STARS_PER_GIFT,(Math.floor(P.stars/STARS_PER_GIFT)+1)*STARS_PER_GIFT);
+const giftPending=()=>P.stickers<STICKERS.length&&P.stars>=P.giftAt;
 function win(afterText,bonus=0){
   sfx.win();
   P.stars+=1+bonus;P.total++;G.streak++;G.run++;P.best=Math.max(P.best||0,G.run);P.played[G.mode]=1;
@@ -660,37 +663,44 @@ function win(afterText,bonus=0){
   if(S.diff==='auto'&&G.streak>=3&&G.level<4){G.level++;G.streak=0}
   const superRun=G.run>0&&G.run%5===0;
   if(superRun){P.stars++;confetti(180,'⭐');sfx.fanfare()}else confetti();
-  const giftsDue=Math.floor(P.stars/STARS_PER_GIFT)-P.stickers;
-  for(let i=0;i<giftsDue&&P.stickers+queue.filter(q=>q.t==='gift').length<STICKERS.length;i++)queue.push({t:'gift'});
-  for(const m of MEDALS)if(!P.medals[m.id]&&m.test(P)){P.medals[m.id]=Date.now();queue.push({t:'medal',m})}
+  checkMedals();
   renderStars();renderProgress();save();
   const sr=superRun?tr('¡Súper racha! ','Super streak! '):'';
-  say(`${sr}${pick(PRAISE[S.lang])} ${afterText||''}`,{then:()=>nextReward()});
+  G.giftDone=false;const token=++roundToken;
+  say(`${sr}${pick(PRAISE[S.lang])} ${afterText||''}`,{then:()=>{if(token===roundToken)nextReward()}});
 }
+function checkMedals(){for(const m of MEDALS)if(!P.medals[m.id]&&m.test(P)){P.medals[m.id]=Date.now();queue.push(m)}}
+/* at most one present and one medal after each win, then the next question */
 function nextReward(){
-  const q=queue.shift();
-  if(!q){setTimeout(nextRound,450);return}
+  if(rewardOpen)return;
   const rw=$('#reward'),pic=$('#rwPic'),go=$('#rwGo'),txt=$('#rwText');
-  rw.hidden=false;pic.className='pic';
-  if(q.t==='gift'){
+  go.textContent=tr('¡Seguir! ▶','Next! ▶');
+  if(!G.giftDone&&giftPending()){
+    G.giftDone=true;rewardOpen=true;rw.hidden=false;pic.className='pic';
     let taps=0;pic.textContent='🎁';txt.textContent=tr('¡Toca el regalo!','Tap the present!');go.hidden=true;
     say(tr('¡Un regalo! Tócalo tres veces para abrirlo.','A present! Tap it three times to open it.'));
     pic.onclick=()=>{
       if(taps>=3)return;taps++;sfx.knock();pic.classList.remove('wig');void pic.offsetWidth;pic.classList.add('wig');
       if(taps===3){
-        const emo=STICKERS[P.stickers];P.stickers++;save();
-        for(const m of MEDALS)if(!P.medals[m.id]&&m.test(P)){P.medals[m.id]=Date.now();queue.push({t:'medal',m})}
+        const emo=STICKERS[P.stickers];P.stickers++;P.giftAt=(Math.floor(P.stars/STARS_PER_GIFT)+1)*STARS_PER_GIFT;checkMedals();save();
         pic.textContent=emo;pic.className='pic bob';txt.textContent=tr('¡Nuevo amigo!','A new friend!');go.hidden=false;
         sfx.fanfare();confetti(140,emo);say(tr('¡Eric, tienes un amigo nuevo para tu álbum!','Eric, you have a new friend for your album!'));
       }
     };
-  }else{
-    pic.onclick=null;pic.textContent=q.m.e;pic.className='pic bob';go.hidden=false;
-    txt.textContent=tr(`¡Medalla! ${q.m.es}`,`Medal! ${q.m.en}`);
-    sfx.fanfare();confetti(120,q.m.e);say(tr(`¡Medalla nueva! ${q.m.es}`,`New medal! ${q.m.en}`));
+    return;
   }
+  const m=queue.shift();
+  if(m){
+    queue.length=0;rewardOpen=true;rw.hidden=false;
+    pic.onclick=null;pic.textContent=m.e;pic.className='pic bob';go.hidden=false;
+    txt.textContent=tr(`¡Medalla! ${m.es}`,`Medal! ${m.en}`);
+    sfx.fanfare();confetti(120,m.e);say(tr(`¡Medalla nueva! ${m.es}`,`New medal! ${m.en}`));
+    return;
+  }
+  const token=roundToken;
+  setTimeout(()=>{if(token===roundToken&&!$('#game').hidden){roundToken++;nextRound()}},450);
 }
-$('#rwGo').onclick=()=>{sfx.tap();$('#reward').hidden=true;renderProgress();nextReward()};
+$('#rwGo').onclick=()=>{if(!rewardOpen)return;sfx.tap();rewardOpen=false;$('#reward').hidden=true;renderProgress();nextReward()};
 
 /* ---------- memory (pairs) ---------- */
 function memoryRound(stage){
@@ -798,7 +808,7 @@ function renderStats(){
 }
 let resetArmed=false;
 $('#reset').onclick=()=>{if(!resetArmed){resetArmed=true;$('#reset').textContent='Pulsa otra vez para confirmar';setTimeout(()=>{resetArmed=false;$('#reset').textContent='Borrar progreso'},3000);return}
-  P={stars:0,stickers:0,miss:{},hit:{},total:0,best:0,medals:{},played:{},memWins:0,enHits:0};save();renderStats();renderStars();resetArmed=false;$('#reset').textContent='Progreso borrado'};
+  P={stars:0,stickers:0,miss:{},hit:{},total:0,best:0,medals:{},played:{},memWins:0,enHits:0,giftAt:STARS_PER_GIFT};save();renderStats();renderStars();resetArmed=false;$('#reset').textContent='Progreso borrado'};
 
 /* keep screen awake while playing */
 async function wake(){try{await navigator.wakeLock?.request('screen')}catch(e){}}
